@@ -43,16 +43,16 @@ class Bank {
     return getExchangeResult().then(result => {
       let amount = 0;
       for (const item of this.clients) {
-        for (const account of item.debitAccount) {
-          amount += (account.balance / result.USD.sale)
-            * result[account.currency].sale;
-        }
-        for (const account of item.creditAccount) {
-          if (account.limit < account.balance) {
-            amount += ((account.balance - account.limit) / result.USD.sale)
-              * result[account.currency].sale;
+        item.debitAccount.forEach(value => {
+          amount += (value.balance / result.USD.sale)
+            * result[value.currency].sale;
+        });
+        item.creditAccount.forEach(value => {
+          if (value.limit < value.balance) {
+            amount += ((value.balance - value.limit) / result.USD.sale)
+              * result[value.currency].sale;
           }
-        }
+        });
       }
       return amount;
     })
@@ -111,15 +111,15 @@ class Client {
   }
 }
 
-const client1 = new Client('Ivanov', 'Ivan', 'Ivanovich', 'yes', 1)
-client1.addDebitAccount('USD', '31.12.23', 1000)
-client1.addCreditAccount('USD', '31.12.23', 250, 2000)
+const client1 = new Client('Ivanov', 'Ivan', 'Ivanovich', 'yes', 1);
+client1.addDebitAccount('USD', '31.12.23', 1000);
+client1.addCreditAccount('USD', '31.12.23', 250, 2000);
 
-const client2 = new Client('Ivanov', 'Ivan', 'Ivanovich', 'no', 2)
-client2.addDebitAccount('USD', '31.12.23', 1000)
+const client2 = new Client('Ivanov', 'Ivan', 'Ivanovich', 'no', 2);
+client2.addDebitAccount('USD', '31.12.23', 1000);
 client2.addCreditAccount('USD', '31.12.23', 250, 200);
 
-const client3 = new Client('Ivanov', 'Ivan', 'Ivanovich', 'yes', 3)
+const client3 = new Client('Ivanov', 'Ivan', 'Ivanovich', 'yes', 3);
 client3.addDebitAccount('USD', '31.12.23', 1000);
 client3.addCreditAccount('USD', '31.12.23', 250, 200);
 
