@@ -43,19 +43,24 @@ class Bank {
     return getExchangeResult().then(result => {
       let amount = 0;
       for (const item of this.clients) {
-        item.debitAccount.forEach(value => {
-          amount += (value.balance / result.USD.sale)
-            * result[value.currency].sale;
-        });
-        item.creditAccount.forEach(value => {
-          if (value.limit < value.balance) {
-            amount += ((value.balance - value.limit) / result.USD.sale)
-              * result[value.currency].sale;
+        for (const key of Object.values(item)) {
+          if (Array.isArray(key)) {
+            key.forEach(value => {
+              if (value.limit) {
+                if (value.limit < value.balance) {
+                  amount += ((value.balance - value.limit) / result.USD.sale)
+                    * result[value.currency].sale;
+                }
+              } else {
+                amount += (value.balance / result.USD.sale)
+                  * result[value.currency].sale;
+              }
+            });
           }
-        });
+        }
       }
       return amount;
-    })
+    });
   }
 
   amountClientsDebtors(status) {
