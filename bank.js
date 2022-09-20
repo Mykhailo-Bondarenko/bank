@@ -39,25 +39,26 @@ class Bank {
       });
   }
 
-  totalFunds() {
-    return getExchangeResult().then(result => {
+  totalFunds(array) {
+    return getExchangeResult().then((result) => {
       let amount = 0;
-      for (const item of this.clients) {
-        for (const key of Object.values(item)) {
-          if (Array.isArray(key)) {
-            key.forEach(value => {
-              if (value.limit) {
-                if (value.limit < value.balance) {
-                  amount += ((value.balance - value.limit) / result.USD.sale)
-                    * result[value.currency].sale;
-                }
-              } else {
-                amount += (value.balance / result.USD.sale)
-                  * result[value.currency].sale;
-              }
-            });
+
+      for (let i = 0; i < this.clients.length; i++) {
+        let arr = [...array];
+        this.clients[i][arr[0]].forEach(value => {
+          if (value.limit) {
+            if (value.limit < value.balance) {
+              amount += ((value.balance - value.limit) / result.USD.sale)
+                * result[value.currency].sale;
+            }
+          } else {
+            amount += (value.balance / result.USD.sale)
+              * result[value.currency].sale;
           }
-        }
+        });
+        arr.splice(0, 1);
+        if (arr.length === 0) break;
+        this.totalFunds(arr);
       }
       return amount;
     });
