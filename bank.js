@@ -39,27 +39,21 @@ class Bank {
       });
   }
 
-  totalFunds(array) {
+  totalFunds() {
     return getExchangeResult().then((result) => {
       let amount = 0;
 
-      for (let i = 0; i < this.clients.length; i++) {
-        let arr = [...array];
-        this.clients[i][arr[0]].forEach(value => {
-          if (value.limit) {
-            if (value.limit < value.balance) {
-              amount += ((value.balance - value.limit) / result.USD.sale)
-                * result[value.currency].sale;
-            }
-          } else {
-            amount += (value.balance / result.USD.sale)
-              * result[value.currency].sale;
-          }
-        });
-        arr.splice(0, 1);
-        if (arr.length === 0) break;
-        this.totalFunds(arr);
-      }
+      const accounts = [];
+
+      this.clients.forEach(client => {
+        accounts.push(...client.creditAccount, ...client.debitAccount);
+      });
+
+      accounts.forEach(account => {
+        amount += ((account.balance - account.limit) / result.USD.sale)
+          * result[account.currency].sale;
+      })
+
       return amount;
     });
   }
