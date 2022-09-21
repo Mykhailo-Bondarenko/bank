@@ -104,7 +104,7 @@ class Client {
     this.registrationDate = new Date().toLocaleDateString();
   }
   addDebitAccount(currency, expirationDate, balance) {
-    this.debitAccount.push({ currency, expirationDate, balance });
+    this.debitAccount.push({ currency, expirationDate, balance, limit: 0 });
   }
   addCreditAccount(currency, expirationDate, balance, limit) {
     this.creditAccount.push({ currency, expirationDate, balance, limit });
