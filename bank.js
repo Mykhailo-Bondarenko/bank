@@ -29,10 +29,8 @@ class Bank {
         let debt = 0;
         for (const item of this.clients) {
           for (const account of item.creditAccount) {
-            if (account.limit > account.balance) {
-              debt += ((account.limit - account.balance) / result.USD.sale)
-                * result[account.currency].sale;
-            }
+            debt += ((account.limit - account.balance) / result.USD.sale)
+              * result[account.currency].sale;
           }
         }
         return debt;
@@ -42,18 +40,12 @@ class Bank {
   totalFunds() {
     return getExchangeResult().then((result) => {
       let amount = 0;
-
-      const accounts = [];
-
       this.clients.forEach(client => {
-        accounts.push(...client.creditAccount, ...client.debitAccount);
+        for (const value of [...client.creditAccount, ...client.debitAccount]) {
+          amount += ((value.balance - value.limit) / result.USD.sale)
+            * result[value.currency].sale;
+        }
       });
-
-      accounts.forEach(account => {
-        amount += ((account.balance - account.limit) / result.USD.sale)
-          * result[account.currency].sale;
-      })
-
       return amount;
     });
   }
@@ -80,10 +72,8 @@ class Bank {
         this.clients.forEach((client => {
           if (client.isActive === isActive && client.creditAccount.length > 0) {
             client.creditAccount.forEach(value => {
-              if (value.limit > value.balance) {
-                let temp = (value.limit - value.balance) / result.USD.sale;
-                sum += temp * result[value.currency].sale;
-              }
+              let temp = (value.limit - value.balance) / result.USD.sale;
+              sum += temp * result[value.currency].sale;
             });
           }
         }));
@@ -107,24 +97,29 @@ class Client {
     this.debitAccount.push({ currency, expirationDate, balance, limit: 0 });
   }
   addCreditAccount(currency, expirationDate, balance, limit) {
+    if (balance > limit) {
+      throw new Error('Credit balance cannot exceed the limit of the card.');
+    }
     this.creditAccount.push({ currency, expirationDate, balance, limit });
   }
 }
 
 const client1 = new Client('Ivanov', 'Ivan', 'Ivanovich', 'yes', 1);
 client1.addDebitAccount('USD', '31.12.23', 1000);
-client1.addCreditAccount('USD', '31.12.23', 250, 2000);
+client1.addCreditAccount('USD', '31.12.23', 250, 1000);
 
 const client2 = new Client('Ivanov', 'Ivan', 'Ivanovich', 'no', 2);
-client2.addDebitAccount('USD', '31.12.23', 1000);
-client2.addCreditAccount('USD', '31.12.23', 250, 200);
+client2.addDebitAccount('USD', '31.12.23', 2000);
+client2.addCreditAccount('USD', '31.12.23', 250, 2000);
 
 const client3 = new Client('Ivanov', 'Ivan', 'Ivanovich', 'yes', 3);
-client3.addDebitAccount('USD', '31.12.23', 1000);
-client3.addCreditAccount('USD', '31.12.23', 250, 200);
+client3.addDebitAccount('USD', '31.12.23', 3000);
+client3.addDebitAccount('USD', '31.12.23', 4000);
+client3.addCreditAccount('USD', '31.12.23', 250, 3000);
+client3.addCreditAccount('USD', '31.12.23', 250, 4000);
 
 clients.push(client1);
 clients.push(client2);
 clients.push(client3);
 
-let bank = new Bank(clients);
+const bank = new Bank(clients);
